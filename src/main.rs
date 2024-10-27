@@ -271,7 +271,7 @@ fn load_notes() -> Vec<Note> {
                     ),
                 };
 
-                let html = markdown_to_html_me(&content);
+                let html = md_to_html(&content);
                 Note {
                     timestamp,
                     content: content.to_string(),
@@ -284,18 +284,7 @@ fn load_notes() -> Vec<Note> {
     }
 }
 
-fn markdown_to_html_me(markdown: &str) -> String {
-    let mut options = Options::default();
-    options.extension.strikethrough = true;
-    options.extension.tagfilter = true;
-    options.extension.table = true;
-    options.extension.autolink = true;
-    options.extension.tasklist = true;
-    options.extension.superscript = true;
-    options.render.unsafe_ = true;
-    markdown_to_html(markdown, &options)
-}
-
+// route / (root)
 async fn index(State(state): State<AppState>) -> Html<String> {
     let notes = state.notes.lock().unwrap();
     let notes_html = notes
@@ -314,6 +303,7 @@ async fn index(State(state): State<AppState>) -> Html<String> {
     Html(html)
 }
 
+// route /save
 async fn save_note(
     State(state): State<AppState>,
     Json(content): Json<String>,
@@ -338,7 +328,7 @@ async fn save_note(
     }
 
     let timestamp = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
-    let html = markdown_to_html_me(&content); // Changed to pass a reference
+    let html = md_to_html(&content); // Changed to pass a reference
     let note = Note {
         timestamp: timestamp.clone(),
         content: content.clone(),
@@ -377,7 +367,7 @@ async fn save_note(
                             "(local copy failed)",
                         );
                         last_note.content = updated_content.clone();
-                        last_note.html = markdown_to_html_me(&updated_content); // Changed to pass a reference here too
+                        last_note.html = md_to_html(&updated_content); // Changed to pass a reference here too
 
                         drop(notes_lock);
 
@@ -411,6 +401,45 @@ async fn save_note(
     Ok(())
 }
 
+// route GET /search/{query}
+async fn search_notes(State(state): State<AppState>, Path(query): Path<String>) -> Json<Vec<Note>> {
+    let notes = state.notes.lock().unwrap();
+    let filtered: Vec<Note> = notes
+        .iter()
+        .filter(|note| note.content.to_lowercase().contains(&query.to_lowercase()))
+        .cloned()
+        .collect();
+    Json(filtered)
+}
+
+// route POST /upload
+async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCode> {
+    while let Some(field) = multipart.next_field().await.unwrap() {
+        let name = field.file_name().unwrap().to_string();
+        let data = field.bytes().await.unwrap();
+
+        let path = PathBuf::from("attachments").join(&name);
+        fs::write(path, data).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+
+        return Ok(Json(format!("/attachments/{}", name)));
+    }
+
+    Err(StatusCode::BAD_REQUEST)
+}
+
+// UTILS
+fn md_to_html(markdown: &str) -> String {
+    let mut options = Options::default();
+    options.extension.strikethrough = true;
+    options.extension.tagfilter = true;
+    options.extension.table = true;
+    options.extension.autolink = true;
+    options.extension.tasklist = true;
+    options.extension.superscript = true;
+    options.render.unsafe_ = true;
+    markdown_to_html(markdown, &options)
+}
+
 fn url_to_safe_filename(url: &str) -> String {
     let mut safe_name = String::with_capacity(url.len());
 
@@ -430,28 +459,4 @@ fn url_to_safe_filename(url: &str) -> String {
     }
 
     safe_name.trim_matches(|c| c == '.' || c == ' ').to_string()
-}
-
-async fn search_notes(State(state): State<AppState>, Path(query): Path<String>) -> Json<Vec<Note>> {
-    let notes = state.notes.lock().unwrap();
-    let filtered: Vec<Note> = notes
-        .iter()
-        .filter(|note| note.content.to_lowercase().contains(&query.to_lowercase()))
-        .cloned()
-        .collect();
-    Json(filtered)
-}
-
-async fn upload_file(mut multipart: Multipart) -> Result<Json<String>, StatusCode> {
-    while let Some(field) = multipart.next_field().await.unwrap() {
-        let name = field.file_name().unwrap().to_string();
-        let data = field.bytes().await.unwrap();
-
-        let path = PathBuf::from("attachments").join(&name);
-        fs::write(path, data).map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
-
-        return Ok(Json(format!("/attachments/{}", name)));
-    }
-
-    Err(StatusCode::BAD_REQUEST)
 }
