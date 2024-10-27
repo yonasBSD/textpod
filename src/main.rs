@@ -1,5 +1,5 @@
 use axum::{
-    extract::Multipart,
+    extract::{DefaultBodyLimit, Multipart},
     extract::{Path, State},
     http::StatusCode,
     response::Html,
@@ -226,6 +226,8 @@ struct AppState {
     notes: Arc<Mutex<Vec<Note>>>,
 }
 
+const CONTENT_LENGTH_LIMIT: usize = 500 * 1024 * 1024; // allow uploading up to 500mb files... overkill?
+
 #[tokio::main]
 async fn main() {
     let args = Args::parse();
@@ -240,6 +242,7 @@ async fn main() {
         .route("/save", post(save_note))
         .route("/search/:query", get(search_notes))
         .route("/upload", post(upload_file))
+        .layer(DefaultBodyLimit::max(CONTENT_LENGTH_LIMIT))
         .nest_service("/attachments", ServeDir::new("attachments"))
         .with_state(state);
 
