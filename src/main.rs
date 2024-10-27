@@ -184,10 +184,14 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
                     const before = editor.value.substring(0, position);
                     const after = editor.value.substring(position);
 
+                    // Link path with spaces needs to be wrapped in < >, Commonmark spec apparently handles this
+                    const needsBrackets = path.includes(' ') || filename.includes(' ');
+                    const formattedPath = needsBrackets ? `<${path}>` : path;
+
                     if (file.type.startsWith('image/')) {
-                        editor.value = `${before}![${filename}](${path})${after}`;
+                        editor.value = `${before}![${filename}](${formattedPath})${after}`;
                     } else {
-                        editor.value = `${before}[${filename}](${path})${after}`;
+                        editor.value = `${before}[${filename}](${formattedPath})${after}`;
                     }
                 }
             }
