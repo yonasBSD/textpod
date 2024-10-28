@@ -1,8 +1,9 @@
 # Textpod
 
-Local, web-based notetaking app inspired by "One Big Text File" idea. Short demo:
+Local, web-based notetaking app inspired by "One Big Text File" idea. Short demo (video, no sound):
 
-<iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/VAqJJxaJNVM?si=BZZMxbN9r_SFXw74" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+[![Textpod short demo video](https://img.youtube.com/vi/VAqJJxaJNVM/0.jpg)](https://www.youtube.com/watch?v=VAqJJxaJNVM)
+
 
 - Single page with all notes and a simple entry form (Markdown)
 - All notes are stored in a single `notes.md` file
