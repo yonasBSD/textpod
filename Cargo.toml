@@ -2,6 +2,11 @@
 name = "textpod"
 version = "0.1.1"
 edition = "2021"
+license-file = "LICENSE"
+description = "Local, web-based notetaking app inspired by 'One Big Text File' idea."
+homepage = "https://github.com/freetonik/textpod"
+repository = "https://github.com/freetonik/textpod"
+readme = "README.md"
 
 [dependencies]
 axum = { version = "0.7.7", features = ["multipart"] }
