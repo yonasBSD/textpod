@@ -29,7 +29,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
     <link rel="shortcut icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIGZpbGw9ImN1cnJlbnRDb2xvciIgdmlld0JveD0iMCAwIDI0IDI0IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9J00xMS42NjkgMi4yODJjLjIxOC0uMDQzLjQ0My0uMDQzLjY2MiAwIC4yNTEuMDQ4LjQ3OS4xNjcuNjkxLjI3N2wuMDUzLjAyOCA4LjI3IDQuMjhhLjc1Ljc1IDAgMCAxIC40MDUuNjY2djcuODk3YzAgLjI4My4wMDIuNTgzLS4wOTMuODYyYTEuNzU4IDEuNzU4IDAgMCAxLS4zOTUuNjUyYy0uMjA1LjIxNC0uNDczLjM1MS0uNzIzLjQ4bC0uMDYzLjAzMy04LjEzMSA0LjIwOGEuNzUuNzUgMCAwIDEtLjY5IDBsLTguMTMxLTQuMjA4LS4wNjMtLjAzM2MtLjI1LS4xMjktLjUxOC0uMjY2LS43MjMtLjQ4YTEuNzU5IDEuNzU5IDAgMCAxLS4zOTUtLjY1MmMtLjA5NS0uMjgtLjA5NC0uNTgtLjA5My0uODYzVjcuNTMzYS43NS43NSAwIDAgMSAuNDA1LS42NjZsOC4yNjktNC4yOC4wNTMtLjAyN2MuMjEzLS4xMTEuNDQtLjIzLjY5Mi0uMjc4bS4yMjYgMS40OTZhNi41NzkgNi41NzkgMCAwIDAtLjI4Mi4xNDFMNC42NjggNy41MTQgMTIgMTEuMTAybDcuMzMyLTMuNTg4LTYuOTQ2LTMuNTk1YTYuNTA1IDYuNTA1IDAgMCAwLS4yODItLjE0MS40OC40OCAwIDAgMC0uMDU4LS4wMjRtLS43OTYgMTYuMDEzdi03LjM2MmwtNy41LTMuNjd2Ni42MjRjMCAuMTg3IDAgLjI5NC4wMDUuMzc1YS40OTYuNDk2IDAgMCAwIC4wMDkuMDc4LjI1OC4yNTggMCAwIDAgLjA1Ny4wOTVjLjAwNS4wMDQuMDIxLjAxNy4wNjQuMDQyLjA2OC4wNDIuMTYzLjA5LjMyOC4xNzZ6bS42NDUtMTUuOTlhLjQ4My40ODMgMCAwIDEgLjA2LS4wMjN6Jy8+PC9zdmc+" />
     <style>
         @media (prefers-color-scheme: light) {
-            .timestamp {
+            time {
                 color: #666;
             }
             .note code {
@@ -40,7 +40,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
             }
         }
         @media (prefers-color-scheme: dark) {
-            .timestamp {
+            time {
                 color: #BBB;
             }
             .note code {
@@ -91,7 +91,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
         .note img, .note iframe, .note video, .note audio, .note embed, .note svg {
             max-width: 100%;
         }
-        .timestamp {
+        time {
             font-size: 0.9em;
             margin-bottom: 0.25em;
             font-family: monospace;
@@ -221,7 +221,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
                 .map(note => `
                     <div class="note">
                         ${note.html}
-                        <div class="timestamp">${note.timestamp}</div>
+                        <time datetime="${note.timestamp}">${note.timestamp}</time>
                     </div>`)
                 .join('');
         }
@@ -315,8 +315,8 @@ async fn index(State(state): State<AppState>) -> Html<String> {
         .rev()
         .map(|note| {
             format!(
-                "<div class=\"note\">{}<div class=\"timestamp\">{}</div></div>",
-                note.html, note.timestamp
+                "<div class=\"note\">{}<time datetime=\"{}\">{}</time></div>",
+                note.html, note.timestamp, note.timestamp
             )
         })
         .collect::<Vec<_>>()
