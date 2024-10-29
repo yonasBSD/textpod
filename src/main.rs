@@ -71,7 +71,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
         .note img, .note iframe, .note video, .note audio, .note embed, .note svg {
             max-width: 100%;
         }
-        .timestamp {
+        time {
             color: #666;
             font-size: 0.9em;
             margin-bottom: 0.25em;
@@ -202,7 +202,7 @@ const INDEX_HTML: &str = r#"<!DOCTYPE html>
                 .map(note => `
                     <div class="note">
                         ${note.html}
-                        <div class="timestamp">${note.timestamp}</div>
+                        <time datetime="${note.timestamp}">${note.timestamp}</time>
                     </div>`)
                 .join('');
         }
@@ -296,8 +296,8 @@ async fn index(State(state): State<AppState>) -> Html<String> {
         .rev()
         .map(|note| {
             format!(
-                "<div class=\"note\">{}<div class=\"timestamp\">{}</div></div>",
-                note.html, note.timestamp
+                "<div class=\"note\">{}<time datetime=\"{}\">{}</time></div>",
+                note.html, note.timestamp, note.timestamp
             )
         })
         .collect::<Vec<_>>()
