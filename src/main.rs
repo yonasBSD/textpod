@@ -272,7 +272,7 @@ async fn main() {
         .nest_service("/attachments", ServeDir::new("attachments"))
         .with_state(state);
 
-    let server_details = format("{}:{}", args.listen, args.port);
+    let server_details = format!("{}:{}", args.listen, args.port);
     let addr: SocketAddr = server_details.parse().expect("Unable to parse socket address");
     println!("Server running on http://{}", addr);
 
