@@ -286,8 +286,6 @@ async fn main() {
             println!("Failed to bind to address {}: {}", addr, e);
         }
     }
-        .await
-        .unwrap();
 }
 
 fn load_notes() -> Vec<Note> {
