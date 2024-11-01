@@ -235,6 +235,9 @@ struct Args {
     /// Port number for the server
     #[arg(short, long, default_value_t = 3000)]
     port: u16,
+    /// Listen address for the server
+    #[arg(short, long, default_value_t = String::from("127.0.0.1"))]
+    listen: String,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -269,12 +272,20 @@ async fn main() {
         .nest_service("/attachments", ServeDir::new("attachments"))
         .with_state(state);
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], args.port));
+    let server_details = format!("{}:{}", args.listen, args.port);
+    let addr: SocketAddr = server_details.parse().expect("Unable to parse socket address");
     println!("Server running on http://{}", addr);
 
-    axum::serve(tokio::net::TcpListener::bind(&addr).await.unwrap(), app)
-        .await
-        .unwrap();
+    match tokio::net::TcpListener::bind(&addr).await {
+        Ok(listener) => {
+            if let Err(e) = axum::serve(listener, app).await {
+                println!("Server error: {}", e);
+            }
+        }
+        Err(e) => {
+            println!("Failed to bind to address {}: {}", addr, e);
+        }
+    }
 }
 
 fn load_notes() -> Vec<Note> {
