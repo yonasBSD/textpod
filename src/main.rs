@@ -276,7 +276,16 @@ async fn main() {
     let addr: SocketAddr = server_details.parse().expect("Unable to parse socket address");
     println!("Server running on http://{}", addr);
 
-    axum::serve(tokio::net::TcpListener::bind(&addr).await.unwrap(), app)
+    match tokio::net::TcpListener::bind(&addr).await {
+        Ok(listener) => {
+            if let Err(e) = axum::serve(listener, app).await {
+                println!("Server error: {}", e);
+            }
+        }
+        Err(e) => {
+            println!("Failed to bind to address {}: {}", addr, e);
+        }
+    }
         .await
         .unwrap();
 }
