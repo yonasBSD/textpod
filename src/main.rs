@@ -20,7 +20,7 @@ use std::{
 use tokio::process::Command;
 use tokio::spawn;
 use tower_http::services::ServeDir;
-use tracing::{info, error};
+use tracing::{error, info};
 use tracing_subscriber;
 
 const INDEX_HTML: &str = r#"<!DOCTYPE html>
@@ -277,7 +277,9 @@ async fn main() {
         .with_state(state);
 
     let server_details = format!("{}:{}", args.listen, args.port);
-    let addr: SocketAddr = server_details.parse().expect("Unable to parse socket address");
+    let addr: SocketAddr = server_details
+        .parse()
+        .expect("Unable to parse socket address");
     println!("Starting server on http://{}", addr);
 
     match tokio::net::TcpListener::bind(&addr).await {
