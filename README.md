@@ -16,8 +16,17 @@ Local, web-based notetaking app inspired by "One Big Text File" idea. Short demo
 
 ## Installation
 
-```
+#### Using [Cargo](https://crates.io/crates/textpod) (cross-platform)
+
+```console
 cargo install textpod
+```
+
+#### Via [Homebrew](https://brew.sh/) (macOS and GNU/Linux)
+
+```console
+brew tap freetonik/tap
+brew install textpod
 ```
 
 In order to download webpages, you need to have `monolith` installed. `cargo install monolith` or `brew install monolith` (macOS). See [monolith](https://github.com/Y2Z/monolith) for more details.
