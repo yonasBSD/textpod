@@ -6,6 +6,7 @@ on:
     paths-ignore:
     - 'LICENSE'
     - 'README.md'
+    - 'RELEASE_CHECKLIST.md'
 
 env:
   CARGO_TERM_COLOR: always
