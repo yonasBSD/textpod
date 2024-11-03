@@ -21,10 +21,11 @@ jobs:
     - name: Build the executable
       run: cargo build --release --target x86_64-unknown-linux-musl --target x86_64-pc-windows-gnu
 
-    - name: Tar binaries
-      run: |
-        tar -czvf textpod-gnu-linux-x86_64.tar.gz target/x86_64-unknown-linux-musl/release/textpod
-        zip -j textpod-windows.zip target/x86_64-pc-windows-gnu/release/textpod.exe
+    - name: Tar x86_64 binary
+      run: tar -czvf textpod-gnu-linux-x86_64.tar.gz target/x86_64-unknown-linux-musl/release/textpod
+
+    - name: Zip windows binary
+      run: zip -j textpod-windows.zip target/x86_64-pc-windows-gnu/release/textpod.exe
 
     - name: Upload release binaries
       uses: alexellis/upload-assets@0.4.0
@@ -45,10 +46,11 @@ jobs:
     - name: Build the executable
       run: cargo build --release --target=x86_64-apple-darwin --target=aarch64-apple-darwin
 
-    - name: Zip binaries
-      run: 
-        zip -j textpod-macos-x86_64.zip target/x86_64-apple-darwin/release/textpod
-        zip -j textpod-macos-aarch64.zip target/aarch64-apple-darwin/release/textpod
+    - name: Zip x86_64 binary
+      run: zip -j textpod-macos-x86_64.zip target/x86_64-apple-darwin/release/textpod
+
+    - name: Zip arm64 binary
+      run: zip -j textpod-macos-aarch64.zip target/aarch64-apple-darwin/release/textpod
 
     - name: Upload release binaries
       uses: alexellis/upload-assets@0.4.0
