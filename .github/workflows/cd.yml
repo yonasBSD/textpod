@@ -1,81 +1,58 @@
-name: Deploy
+name: CD
 
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+"
-
-permissions:
-  contents: write
+  release:
+    types:
+    - created
 
 jobs:
-  build-and-upload:
-    name: Build and upload
-    runs-on: ${{ matrix.os }}
-
-    strategy:
-      matrix:
-        # You can add more, for any target you'd like!
-        include:
-          - build: linux
-            os: ubuntu-latest
-            target: x86_64-unknown-linux-musl
-
-          - build: macos
-            os: macos-latest
-            target: x86_64-apple-darwin
-
-          - build: windows-gnu
-            os: windows-latest
-            target: x86_64-pc-windows-gnu
-
+  linux_windows:
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+    - name: Checkout the repository
+      uses: actions/checkout@v2
 
-      - name: Get the release version from the tag
-        shell: bash
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+    - name: Install Linux and Windows Cross Compilers
+      run: sudo apt-get install --yes --no-install-recommends musl-tools gcc-mingw-w64-x86-64-win32
 
-      - name: Install Rust
-        # Or @nightly if you want
-        uses: dtolnay/rust-toolchain@stable
-        # Arguments to pass in
-        with:
-          # Make Rust compile to our target (defined in the matrix)
-          targets: ${{ matrix.target }}
+    - name: Install rustup targets
+      run: rustup target add x86_64-unknown-linux-musl x86_64-pc-windows-gnu
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          use-cross: true
-          command: build
-          args: --verbose --release --target ${{ matrix.target }}
+    - name: Build the executable
+      run: cargo build --release --target x86_64-unknown-linux-musl --target x86_64-pc-windows-gnu
 
-      - name: Build archive
-        shell: bash
-        run: |
-          # Replace with the name of your binary
-          binary_name="textpod"
+    - name: Tar binaries
+      run: |
+        tar -czvf textpod-gnu-linux-x86_64.tar.gz target/x86_64-unknown-linux-musl/release/textpod
+        zip -j textpod-windows.zip target/x86_64-pc-windows-gnu/release/textpod.exe
 
-          dirname="$binary_name-${{ env.VERSION }}-${{ matrix.target }}"
-          mkdir "$dirname"
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            mv "target/${{ matrix.target }}/release/$binary_name.exe" "$dirname"
-          else
-            mv "target/${{ matrix.target }}/release/$binary_name" "$dirname"
-          fi
+    - name: Upload release binaries
+      uses: alexellis/upload-assets@0.4.0
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        asset_paths: '["textpod-gnu-linux-x86_64.tar.gz", "textpod-windows.zip"]'
 
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            7z a "$dirname.zip" "$dirname"
-            echo "ASSET=$dirname.zip" >> $GITHUB_ENV
-          else
-            tar -czf "$dirname.tar.gz" "$dirname"
-            echo "ASSET=$dirname.tar.gz" >> $GITHUB_ENV
-          fi
+  macos:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout the repository
+      uses: actions/checkout@v2
 
-      - name: Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            ${{ env.ASSET }}
+    - name: Install rustup targets
+      run: rustup target add x86_64-apple-darwin aarch64-apple-darwin
+
+    - name: Build the executable
+      run: cargo build --release --target=x86_64-apple-darwin --target=aarch64-apple-darwin
+
+    - name: Zip binaries
+      run: 
+        zip -j textpod-macos-x86_64.zip target/x86_64-apple-darwin/release/textpod
+        zip -j textpod-macos-aarch64.zip target/aarch64-apple-darwin/release/textpod
+
+    - name: Upload release binaries
+      uses: alexellis/upload-assets@0.4.0
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        asset_paths: '["textpod-macos-x86_64.zip", "textpod-macos-aarch64.zip"]'

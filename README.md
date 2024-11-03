@@ -1,9 +1,12 @@
+[![textpod build status on GNU/Linux](https://github.com/freetonik/textpod/workflows/GNU%2FLinux/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AGNU%2FLinux)
+[![textpod build status on macOS](https://github.com/freetonik/textpod/workflows/macOS/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AmacOS)
+[![textpod build status on Windows](https://github.com/freetonik/textpod/workflows/Windows/badge.svg)](https://github.com/freetonik/textpod/actions?query=workflow%3AWindows)
+
 # Textpod
 
 Local, web-based notetaking app inspired by "One Big Text File" idea. Short demo (video, no sound):
 
 [![Textpod short demo video](https://img.youtube.com/vi/VAqJJxaJNVM/0.jpg)](https://www.youtube.com/watch?v=VAqJJxaJNVM)
-
 
 - Single page with all notes and a simple entry form (Markdown)
 - All notes are stored in a single `notes.md` file
@@ -17,11 +20,8 @@ Local, web-based notetaking app inspired by "One Big Text File" idea. Short demo
 cargo install textpod
 ```
 
-In order to download webpages, you need to have `monolith` installed.
+In order to download webpages, you need to have `monolith` installed. `cargo install monolith` or `brew install monolith` (macOS). See [monolith](https://github.com/Y2Z/monolith) for more details.
 
-```
-cargo install monolith
-```
 
 ## Usage
 
