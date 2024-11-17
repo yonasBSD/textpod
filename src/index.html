@@ -7,30 +7,18 @@
     <link rel="shortcut icon" href="{{FAVICON}}" />
     <style>
         @media (prefers-color-scheme: light) {
-            time {
-                color: #666;
-            }
-
-            .note code {
-                background-color: #dedcd1;
-            }
-
-            .note pre {
-                background-color: #dedcd1;
+            :root {
+                --color-secondary: #666;
+                --color-text-secondary: white;
+                --color-bg-secondary: #dedcd1;
             }
         }
 
         @media (prefers-color-scheme: dark) {
-            time {
-                color: #BBB;
-            }
-
-            .note code {
-                background-color: #3a3a3a;
-            }
-
-            .note pre {
-                background-color: #3a3a3a;
+            :root {
+                --color-secondary: #BBB;
+                --color-text-secondary: black;
+                --color-bg-secondary: #3a3a3a;
             }
         }
 
@@ -48,11 +36,24 @@
         #editor {
             width: 100%;
             height: 200px;
-            margin-bottom: 2em;
             font-family: monospace;
             padding: 1em;
             resize: vertical;
             box-sizing: border-box
+        }
+
+        #submitContainer {
+            margin-bottom: 1.5em;
+            text-align: right;
+        }
+
+        #submitButton {
+            font-family: monospace;
+            padding: 0.4em 1em;
+            background-color: var(--color-secondary);
+            color: var(--color-text-secondary);
+            border: none;
+            cursor: pointer;
         }
 
         .note> :first-child {
@@ -68,12 +69,29 @@
             padding-top: 0.25em;
         }
 
+        .note .noteMetadata {
+            font-size: 0.9em;
+            font-family: monospace;
+            color: var(--color-secondary);
+        }
+
+        .note .noteMetadata a {
+            color: var(--color-secondary);
+            text-decoration: none;
+        }
+
+        .note .noteMetadata a:hover {
+            text-decoration: underline;
+        }
+
         .note code {
             padding: 0.25em;
+            background-color: var(--color-bg-secondary);
         }
 
         .note pre {
             padding: 0.5em;
+            background-color: var(--color-bg-secondary);
         }
 
         .note pre code {
@@ -90,11 +108,6 @@
             max-width: 100%;
         }
 
-        time {
-            font-size: 0.9em;
-            margin-bottom: 0.25em;
-            font-family: monospace;
-        }
     </style>
 </head>
 
@@ -102,7 +115,7 @@
 
     <textarea id="editor"
         placeholder="Ctrl+Enter to save.&#10;Type / to search.&#10;Drag & drop files to attach.&#10;Start links with + to save local copies."></textarea>
-    <button id="submitButton">Submit</button>
+    <div id="submitContainer"><button id="submitButton">Submit</button></div>
     <div id="notes">{{NOTES}}</div>
 
     <script>
@@ -131,6 +144,9 @@
         }
 
         async function saveNotes() {
+            if (!editor.value) {
+                return;
+            }
             const response = await fetch('/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -151,6 +167,24 @@
                     notesDiv.innerHTML = newNotes;
                     originalNotes = newNotes;
                 }
+            }
+        }
+
+        async function deleteNote(event, element) {
+            event.preventDefault();
+            if (!confirm('Are you sure you want to delete this note?')) {
+                return;
+            }
+
+            const timestamp = element.getAttribute('data-timestamp');
+            const response = await fetch(`/delete/${timestamp}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                element.closest('.note').remove();
+            } else {
+                alert('Failed to delete note');
             }
         }
 
